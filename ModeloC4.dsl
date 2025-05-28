@@ -1,75 +1,124 @@
-workspace "Plataforma de gestion de titulos v3"  {
-    description "Sistema de gestión de titulos"
-    
+workspace "Plataforma de Cotización de Seguros" {
+    description "Sistema que permite a los clientes cotizar pólizas en línea, integrado al core SISE de la aseguradora."
+
     model {
-        pEstudiante = person "Estudiante"
-        pSecretaria = person "Secretaria de carrera"
-        pPrencista = person "Prencista"
-        
-        sSenescyt = softwareSystem "Senescyt" {
-            tags "Software"
+        // Personas
+        cliente = person "Cliente" {
+            description "Persona interesada en cotizar pólizas de seguros"
+            tags "Actor"
         }
-        
-        sGestion = softwareSystem "Plataforma de gestion" {
-            tags "SistemaGestion"
-            
-            portalEstudiante = container "Pagina de visualización" {
-                tags "AppWeb"
-                pEstudiante  -> this "Visualiza el título"
-            }
-            
-            portalAdministracion = container "Pagina de administración" {
-                tags "AppWeb"
-                pSecretaria -> this "Generación de título"
-                pPrencista -> this "Imprime el título"
-            }
-            
-            api = container "API" {
+
+        // Sistema externo
+        sise = softwareSystem "SISE - Sistema Core de Seguros" {
+            description "Sistema central de la aseguradora para gestionar pólizas y clientes"
+            tags "SistemaExterno"
+        }
+
+        // Sistema principal
+        cotizador = softwareSystem "Cotizador de Seguros" {
+            description "Sistema que permite cotizar productos de seguros de forma online"
+            tags "SistemaCotizador"
+
+            apiWeb = container "API Web - Cotizador" {
+                technology "Java + Spring Boot"
+                description "Expone servicios REST para cotizar pólizas"
                 tags "Api"
-                portalAdministracion -> this "Generacion/Impresion"
-                portalEstudiante -> this "Consulta"
-                this -> sSenescyt "Autorizar"
-                
-                
-                emailComponente  = component "Email-componente" "Envia notificaciones a los estudiantes"
-                
-                incresoComponente = component "Controlador de ingreso" "Permite el ingreso a los usuarios"
+
+                cliente -> this "Solicita cotización" "HTTPS"
+                this -> sise "Consulta tarifas y condiciones" "REST/JSON"
+
+                // Componentes
+                cotizacionController = component "CotizacionController" {
+                    description "Controlador REST para recibir las solicitudes de cotización"
+                    technology "Spring REST Controller"
+                    tags "Componente"
+                }
+
+                cotizacionService = component "CotizacionService" {
+                    description "Lógica de negocio para calcular cotizaciones"
+                    technology "Servicio Spring"
+                    tags "Componente"
+                }
+
+                cotizacionRepository = component "CotizacionRepository" {
+                    description "Accede a la base de datos de cotizaciones"
+                    technology "Spring Data JPA"
+                    tags "Componente"
+                }
+
+                cotizacionController -> cotizacionService "Delegación de lógica de negocio"
+                cotizacionService -> cotizacionRepository "Acceso a datos de cotización"
             }
-            
-            basedatos = container "Base de datos" {
+
+            baseDatos = container "Base de Datos" {
+                technology "PostgreSQL"
+                description "Almacena cotizaciones, clientes y productos"
                 tags "Database"
-                api -> this "Obtener/Crear/Actualizar/Eliminar"
+
+                apiWeb -> this "CRUD de cotizaciones"
             }
         }
-        
-    
-        
     }
-    
+
     views {
-        systemContext sGestion {
+        // Vista de contexto
+        systemContext cotizador {
             include *
             autolayout lr
+            title "Vista de contexto del sistema Cotizador de Seguros"
         }
-        
-        container sGestion {
+
+        // Vista de contenedores
+        container cotizador {
             include *
             autolayout lr
+            title "Vista de contenedores del Cotizador de Seguros"
         }
-        
-        component api "Componentes" {
+
+        // Vista de componentes (clave válida)
+        component apiWeb componentes_api_web {
             include *
             autolayout lr
+            title "Vista de componentes del API Web"
         }
-        
+
         styles {
-            element "SistemaGestion" {
-                shape Circle
-                background #19b92a
+            element "Actor" {
+                shape Person
+                background #ffcc00
                 color #000000
             }
+
+            element "SistemaCotizador" {
+                shape RoundedBox
+                background #28a745
+                color #ffffff
+            }
+
+            element "SistemaExterno" {
+                shape Box
+                background #cccccc
+                color #000000
+                border dashed
+            }
+
+            element "Api" {
+                shape Hexagon
+                background #007bff
+                color #ffffff
+            }
+
+            element "Database" {
+                shape Cylinder
+                background #6c757d
+                color #ffffff
+            }
+
+            element "Componente" {
+                shape Component
+                background #17a2b8
+                color #ffffff
+            }
         }
-        
-        theme "https://srv-si-001.utpl.edu.ec/REST_PRO_ERP/Recursos/Imagenes/themeAZ_2023.json"
     }
 }
