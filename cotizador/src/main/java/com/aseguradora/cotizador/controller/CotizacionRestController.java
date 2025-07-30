@@ -41,7 +41,7 @@ public class CotizacionRestController {
         repository.save(cotizacion);
 
         // Llamar a n8n
-        String webhookUrl = "https://TU_INSTANCIA.n8n.cloud/webhook/cotizacion"; // Reemplaza con tu webhook real
+        String webhookUrl = "https://andemuri.app.n8n.cloud/webhook/cotizacion"; // Reemplaza con tu webhook real
         Map<String, Object> payload = new HashMap<>();
         payload.put("email", request.getEmail());
         payload.put("monto", prima);
