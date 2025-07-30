@@ -1,10 +1,24 @@
-package com.aseguradora.cotizador.dto;
+package com.aseguradora.cotizador.entity;
 
-public class CotizacionRequest {
+import jakarta.persistence.*;
+
+@Entity
+public class Cotizacion {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private int edadConductor;
     private double valorVehiculo;
     private String tipoPoliza;
+    private double prima;
     private String email;
+
+    // Getters y Setters
+    public Long getId() {
+        return id;
+    }
 
     public int getEdadConductor() {
         return edadConductor;
@@ -28,6 +42,14 @@ public class CotizacionRequest {
 
     public void setTipoPoliza(String tipoPoliza) {
         this.tipoPoliza = tipoPoliza;
+    }
+
+    public double getPrima() {
+        return prima;
+    }
+
+    public void setPrima(double prima) {
+        this.prima = prima;
     }
 
     public String getEmail() {
